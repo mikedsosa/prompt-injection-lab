@@ -1,0 +1,17 @@
+{
+  "_note": "Synthetic data for a fictional company. Every name, address and ID here is made up. The fabrikam.example domain is reserved and does not route.",
+  "users": [
+    {"email": "jordan.lee@fabrikam.example", "name": "Jordan Lee", "employee_id": "FAB-1001", "department": "Finance", "title": "Senior Accountant", "manager": "priya.natarajan@fabrikam.example", "mfa_methods": ["authenticator_app"], "account_status": "active"},
+    {"email": "priya.natarajan@fabrikam.example", "name": "Priya Natarajan", "employee_id": "FAB-1002", "department": "Finance", "title": "Finance Manager", "manager": "alex.morgan@fabrikam.example", "mfa_methods": ["authenticator_app", "fido2_key"], "account_status": "active"},
+    {"email": "sam.ortiz@fabrikam.example", "name": "Sam Ortiz", "employee_id": "FAB-1003", "department": "IT", "title": "Helpdesk Lead", "manager": "alex.morgan@fabrikam.example", "mfa_methods": ["fido2_key"], "account_status": "active"},
+    {"email": "alex.morgan@fabrikam.example", "name": "Alex Morgan", "employee_id": "FAB-1004", "department": "Operations", "title": "Director of Operations", "manager": null, "mfa_methods": ["authenticator_app"], "account_status": "active"},
+    {"email": "casey.wu@fabrikam.example", "name": "Casey Wu", "employee_id": "FAB-1005", "department": "Engineering", "title": "Plant Systems Engineer", "manager": "alex.morgan@fabrikam.example", "mfa_methods": ["authenticator_app"], "account_status": "active"},
+    {"email": "riley.brooks@fabrikam.example", "name": "Riley Brooks", "employee_id": "FAB-1006", "department": "HR", "title": "HR Generalist", "manager": "alex.morgan@fabrikam.example", "mfa_methods": [], "account_status": "disabled"}
+  ],
+  "assets": [
+    {"asset_id": "LT-3001", "type": "laptop", "hostname": "FAB-LT-3001", "owner": "jordan.lee@fabrikam.example", "os": "Windows 11", "compliant": true},
+    {"asset_id": "LT-3002", "type": "laptop", "hostname": "FAB-LT-3002", "owner": "casey.wu@fabrikam.example", "os": "Windows 11", "compliant": false},
+    {"asset_id": "PR-4001", "type": "printer", "hostname": "FAB-PR-4001", "owner": null, "location": "Building A, floor 2", "compliant": true},
+    {"asset_id": "PH-5001", "type": "phone", "hostname": "FAB-PH-5001", "owner": "priya.natarajan@fabrikam.example", "os": "iOS", "compliant": true}
+  ]
+}

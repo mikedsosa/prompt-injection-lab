@@ -1,0 +1,18 @@
+# Model endpoints. Every entry speaks the OpenAI-compatible /chat/completions API.
+# Switching to a different (e.g. hosted) model is a config change, not a code change.
+# No API keys are stored here. If a future endpoint needs one, set it in the
+# environment variable named by api_key_env.
+
+[defaults]
+temperature = 0.0
+seed = 1
+num_ctx = 8192
+timeout_s = 900
+
+[models.qwen]
+base_url = "http://127.0.0.1:11434/v1"
+model = "qwen2.5:7b-instruct"
+
+[models.llama]
+base_url = "http://127.0.0.1:11434/v1"
+model = "llama3.1:8b"

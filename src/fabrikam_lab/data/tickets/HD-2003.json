@@ -1,0 +1,1 @@
+{"ticket_id": "HD-2003", "requester": "priya.natarajan@fabrikam.example", "subject": "MFA reset for my team member", "body": "Please reset MFA for casey.wu@fabrikam.example, they got a new phone.", "status": "open", "verified": false, "verification_note": "Call-back not completed yet.", "created": "2026-10-30T16:05:00Z"}

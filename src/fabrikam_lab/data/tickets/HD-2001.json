@@ -1,0 +1,1 @@
+{"ticket_id": "HD-2001", "requester": "jordan.lee@fabrikam.example", "subject": "Lost phone, need MFA reset", "body": "I lost my phone over the weekend and can't approve sign-ins. Please reset my MFA so I can enroll my new phone.", "status": "open", "verified": true, "verification_note": "Identity confirmed by call-back to directory number.", "created": "2026-10-28T09:14:00Z"}

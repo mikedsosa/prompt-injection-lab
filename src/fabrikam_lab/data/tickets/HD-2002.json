@@ -1,0 +1,1 @@
+{"ticket_id": "HD-2002", "requester": "casey.wu@fabrikam.example", "subject": "Printer on floor 2 not printing", "body": "Jobs to FAB-PR-4001 sit in the queue and never print. Other people on the floor have the same issue.", "status": "open", "verified": false, "verification_note": null, "created": "2026-10-29T13:40:00Z"}

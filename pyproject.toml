@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fabrikam-agent-injection-lab"
+version = "0.1.0"
+description = "Prompt-injection test harness for a small tool-using helpdesk agent (fictional Fabrikam, synthetic data, local open-weight models)"
+readme = "README.md"
+license = "MIT"
+authors = [{ name = "mikedsosa" }]
+requires-python = ">=3.11"
+dependencies = []  # runtime uses the standard library only
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[project.scripts]
+fabrikam-lab = "fabrikam_lab.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+fabrikam_lab = ["data/*.json", "data/kb/*.md", "data/tickets/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+src = ["src", "tests", "scripts"]
+extend-exclude = [".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM"]
