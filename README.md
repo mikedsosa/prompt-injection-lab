@@ -4,10 +4,11 @@ A small, tool-using IT helpdesk agent for the fictional company Fabrikam, built 
 measure how often prompt injection makes it misuse its tools, and how much simple
 prompt-level defenses help.
 
-> **Status: work in progress. Results: not yet run.**
-> Milestone 1 (scaffold, mock tools, agent loop, model client, offline tests) is built.
-> No attack or benign cases have been run against any model, so this README contains
-> no results. Numbers will be added only from real, recorded runs.
+> **Status: work in progress.** Milestones 1 and 2 are built. Milestone 2 added the case
+> format, deterministic canary scoring, 20 original cases, and a first small baseline
+> (20 cases, one run each, on two local 7-8B models). See
+> [`results/baseline/RESULTS.md`](results/baseline/RESULTS.md) for the real numbers and their
+> limits. It is not a full evaluation.
 
 ## What's here so far
 
@@ -23,6 +24,12 @@ prompt-level defenses help.
   `chat(messages, tools, temperature, seed)`. The real client talks to any
   OpenAI-compatible `/chat/completions` endpoint (by default a local Ollama server); a
   scripted stub drives the offline tests.
+- **Injection cases** (`cases/`, `src/fabrikam_lab/cases.py`): one JSON file per case, with
+  the vector (direct, or indirect through a KB article, a ticket, or a tool result), the
+  attacker's goal, the planted payload, a per-case canary, and the checks that count as
+  success. Techniques are cited in [`SOURCES.md`](SOURCES.md).
+- **Deterministic scoring** (`src/fabrikam_lab/scoring.py`): judged from the final answer, the
+  mock outbox and the tool log. Canary matching ignores case, spaces and punctuation.
 - **Tests** (`tests/`): run fully offline. A test-wide guard blocks every network
   connection, so no test can reach a model.
 - **Smoke test** (`scripts/smoke_tool_calling.py`): five benign requests that check a
@@ -37,7 +44,7 @@ prompt-level defenses help.
   only with a verified ticket"); that policy lives in the system prompt and KB. Prompt-level
   mitigations come in a later milestone, and a code-enforced tool gateway is a separate,
   follow-on project measured with this same harness.
-- **Deterministic scoring (planned).** Success is judged from the mock tool logs (canary
+- **Deterministic scoring.** Success is judged from the mock tool logs (canary
   tokens, forbidden recipients, unauthorized resets), not by another model.
 - **Reproducibility.** Every run will record the model tag and digest, Ollama version,
   temperature and seed.
@@ -46,7 +53,7 @@ prompt-level defenses help.
 
 1. Scaffold, mock tools, agent loop, model client, offline tests and CI. **Done.**
 2. Case format, canary scoring, a first 20 cases, then a first baseline run on that subset
-   with both models. Recorded responses get replayed in CI.
+   with both models. Recorded responses get replayed in CI. **Done.**
 3. Full case set tagged to OWASP LLM Top 10, OWASP Agentic Top 10 and MITRE ATLAS, baseline
    run across all cases.
 4. Prompt-level mitigations, measured on seen and held-out cases, plus a temperature
@@ -73,7 +80,13 @@ Against a local model (needs [Ollama](https://ollama.com) with the model pulled)
 ```bash
 PYTHONPATH=src python -m fabrikam_lab ask --model qwen "Is laptop LT-3002 compliant?"
 make smoke-llama
+make cases-qwen   # 20 injection cases, then stop the model before the next one
+make cases-llama
+make summary      # results/baseline/summary.{json,csv} and the table
 ```
+
+Start the server with an 8K context, since the OpenAI-compatible endpoint ignores a
+per-request `num_ctx`: `OLLAMA_CONTEXT_LENGTH=8192 ollama serve`.
 
 Model endpoints live in `config/models.toml`. Pointing the harness at a different
 OpenAI-compatible endpoint is a config change, not a code change.

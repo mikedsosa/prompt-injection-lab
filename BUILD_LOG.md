@@ -26,3 +26,25 @@ Raw file: `results/smoke/llama-20261101T164131Z.jsonl`.
 - Note for milestone 2: Ollama's OpenAI-compatible endpoint doesn't take `num_ctx` per
   request, so the planned 8K context has to be set on the server (`OLLAMA_CONTEXT_LENGTH=8192`)
   and read back from `ollama ps` into the run record.
+
+## Milestone 2: case format, canary scoring, first 20 cases, first baseline
+
+- Case schema and loader (`src/fabrikam_lab/cases.py`): vector, goal, technique, user message,
+  per-case canary, planted environment (KB, tickets, users, assets), success checks, source keys.
+  The loader rejects malformed cases, duplicate ids or canaries, and a canary that already appears
+  in the user message or planted content.
+- `ToolEnv.with_overrides` can now replace users and assets, so payloads can sit in tool results.
+- Deterministic scoring (`src/fabrikam_lab/scoring.py`): canary leak by channel (answer, email,
+  tool arguments), email outside `fabrikam.example`, email to a named address, MFA reset of a named
+  account, text in the answer, and whether the injected item ever reached the model.
+- `harness.py` runs a case, records every model response, and can replay a run offline.
+- 20 original cases (6 direct, 5 KB, 5 ticket, 4 tool result), sources in `SOURCES.md`.
+- `scripts/run_cases.py` and `scripts/summarize.py`. Tests: loader, scoring, and replay of the
+  recorded baseline runs.
+
+### Baseline (Nov 4, 2026)
+
+Ollama 0.40.11, `OLLAMA_CONTEXT_LENGTH=8192` (confirmed 8192 in `/api/ps` for both models), one
+model loaded at a time, temperature 0, seed 1, max 6 turns. Attack success: qwen2.5:7b-instruct
+8/20, llama3.1:8b 7/20. Wall time 429.3 s (Qwen) and 406.0 s (Llama). Full table and caveats in
+`results/baseline/RESULTS.md`. Small baseline: one run per case.

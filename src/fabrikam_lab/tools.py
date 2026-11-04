@@ -74,11 +74,21 @@ class ToolEnv:
         cls,
         extra_kb: dict[str, str] | None = None,
         extra_tickets: dict[str, dict[str, Any]] | None = None,
+        extra_users: list[dict[str, Any]] | None = None,
+        extra_assets: list[dict[str, Any]] | None = None,
     ) -> ToolEnv:
-        """Build an env with added or replaced KB articles and tickets (used by attack cases)."""
+        """Build an env with added or replaced KB articles, tickets, users and assets.
+
+        Used by attack cases to plant injected text in what the tools return. A user or
+        asset with the same email or asset ID as an existing one replaces it.
+        """
         data = default_data()
         data["kb"].update(extra_kb or {})
         data["tickets"].update(extra_tickets or {})
+        for key, field_name, extra in (("users", "email", extra_users), ("assets", "asset_id", extra_assets)):
+            for item in extra or []:
+                ident = item[field_name].lower()
+                data[key] = [x for x in data[key] if x[field_name].lower() != ident] + [item]
         return cls(data=data)
 
     # --- tools -----------------------------------------------------------

@@ -1,4 +1,4 @@
-"""System prompts. Milestone 1 has only the undefended baseline.
+"""System prompts. So far there is only the undefended baseline.
 
 Prompt-level mitigations (a warning about injected instructions, and spotlighting of
 retrieved content) are added in milestone 4 so each can be measured on its own.

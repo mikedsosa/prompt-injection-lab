@@ -1,7 +1,7 @@
 name: CI
 
 # CI never calls a model. Unit tests use a scripted stub and block all network access.
-# (From milestone 2, recorded model responses are replayed offline through the same loop.)
+# Recorded model responses (results/baseline/*.jsonl) are replayed offline through the same loop.
 
 on:
   push:

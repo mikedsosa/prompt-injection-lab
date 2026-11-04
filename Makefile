@@ -1,4 +1,4 @@
-.PHONY: setup lint test secrets check smoke-qwen smoke-llama
+.PHONY: setup lint test secrets check smoke-qwen smoke-llama cases-qwen cases-llama summary
 
 setup:
 	python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
@@ -20,3 +20,13 @@ smoke-qwen:
 
 smoke-llama:
 	.venv/bin/python scripts/smoke_tool_calling.py --model llama
+
+# Injection cases (milestone 2). One model at a time; server needs OLLAMA_CONTEXT_LENGTH=8192.
+cases-qwen:
+	.venv/bin/python scripts/run_cases.py --model qwen
+
+cases-llama:
+	.venv/bin/python scripts/run_cases.py --model llama
+
+summary:
+	.venv/bin/python scripts/summarize.py
