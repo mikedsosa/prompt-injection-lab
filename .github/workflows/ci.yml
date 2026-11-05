@@ -29,6 +29,10 @@ jobs:
         run: |
           ruff check .
           ruff format --check .
+      - name: No large files (over 1 MB)
+        run: |
+          big=$(git ls-files -z | xargs -0 -I{} find {} -size +1M)
+          if [ -n "$big" ]; then echo "Files over 1 MB:"; echo "$big"; exit 1; fi
       - name: Unit tests (pytest, offline)
         run: python -m pytest
 

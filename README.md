@@ -4,11 +4,27 @@ A small, tool-using IT helpdesk agent for the fictional company Fabrikam, built 
 measure how often prompt injection makes it misuse its tools, and how much simple
 prompt-level defenses help.
 
-> **Status: work in progress.** Milestones 1 to 3 are built. Milestone 3 grew the set to 60
-> cases (50 attacks, 10 benign controls) and ran an undefended multi-seed baseline on two
-> local 7-8B models. See [`results/full-baseline/RESULTS.md`](results/full-baseline/RESULTS.md)
-> for the real numbers and their limits. No defenses are measured yet (milestone 4).
-> The milestone 2 baseline (20 cases, one seed) stays in [`results/baseline/`](results/baseline/RESULTS.md).
+> **Status: milestones 1 to 5 done.** 60 original cases (50 attacks, 10 benign controls), an
+> undefended two-seed baseline and a seed-1 defense comparison on two local 7-8B models.
+> Short write-up: [`docs/findings.md`](docs/findings.md). Threat model:
+> [`docs/threat-model.md`](docs/threat-model.md).
+
+## Results at a glance
+
+Attack success out of 50 attack cases, seed 1, temperature 0
+([`results/defenses/RESULTS.md`](results/defenses/RESULTS.md)):
+
+| config | qwen2.5:7b-instruct | llama3.1:8b |
+|---|---|---|
+| no defense | 19/50 | 16/50 |
+| spotlighting | 18/50 | 11/50 |
+| hardened system prompt | 15/50 | 7/50 |
+| tool gateway | 13/50 | 9/50 |
+| output filter | 8/50 | 9/50 |
+| all combined | 0/50 | 0/50 |
+
+No benign control was harmed in any run. Small models, one seed and no held-out set: read
+the limits in the results file before drawing conclusions.
 
 ## What's here so far
 
@@ -45,13 +61,13 @@ prompt-level defenses help.
 - **Local, open-weight models only.** Planned pair: `qwen2.5:7b-instruct` and
   `llama3.1:8b`, served by Ollama on a CPU-only machine. No paid APIs, no API keys.
   Only one model is loaded at a time.
-- **Undefended baseline first.** The tools do not enforce policy (for example, "reset MFA
-  only with a verified ticket"); that policy lives in the system prompt and KB. Prompt-level
-  mitigations come in a later milestone, and a code-enforced tool gateway is a separate,
-  follow-on project measured with this same harness.
+- **Undefended baseline first.** The tools themselves do not enforce policy (for example,
+  "reset MFA only with a verified ticket"); that policy lives in the system prompt and KB.
+  Defenses (`src/fabrikam_lab/defenses.py`) are separate flags, so each is measured alone
+  and combined.
 - **Deterministic scoring.** Success is judged from the mock tool logs (canary
   tokens, forbidden recipients, unauthorized resets), not by another model.
-- **Reproducibility.** Every run will record the model tag and digest, Ollama version,
+- **Reproducibility.** Every run records the model tag and digest, Ollama version,
   temperature and seed.
 
 ## Roadmap
@@ -61,15 +77,15 @@ prompt-level defenses help.
    with both models. Recorded responses get replayed in CI. **Done.**
 3. Full case set tagged to OWASP LLM Top 10, OWASP Agentic Top 10 and MITRE ATLAS, baseline
    run across all cases. **Done** (60 cases; seeds per model in the results file).
-4. Prompt-level mitigations, measured on seen and held-out cases, plus a temperature
-   sensitivity check.
-5. Threat model, runbook, write-up and results.
+4. Defenses: spotlighting, hardened prompt, code-enforced tool gateway, output filter, and
+   all combined, seed 1 on both models. **Done** (no held-out split or temperature check yet).
+5. Threat model, findings write-up, README and CI checks. **Done.**
 
-## Limitations (will apply to any results)
+## Limitations
 
 - Small (7-8B), quantized local models. Findings won't automatically carry over to larger
   hosted models, which often have extra provider-side safety layers.
-- Temperature 0 with only two seeds per model (seeds 1 and 2). On this CPU setup, temperature 0 is
+- Temperature 0 with two seeds per model for the baseline and one seed for defenses. On this CPU setup, temperature 0 is
   not fully deterministic across seeds (see the seed-agreement numbers in the results).
 - Small per-category samples (2 to 13 cases per vector, goal or technique family).
 
@@ -90,6 +106,8 @@ make smoke-llama
 make full-qwen    # all 60 cases, seeds 1 and 2, into results/full-baseline/
 make full-llama   # stop the previous model first; add --resume after an interruption
 make full-summary # results/full-baseline/summary.{json,csv} and summary-table.md
+make defenses     # seed-1 defense runs, both models, resumable
+make defense-summary
 ```
 
 Start the server with an 8K context, since the OpenAI-compatible endpoint ignores a

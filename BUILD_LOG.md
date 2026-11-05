@@ -118,3 +118,13 @@ model loaded at a time, temperature 0, seed 1, max 6 turns. Attack success: qwen
 - Not done: second seed, held-out split, temperature sensitivity check.
 - Tests: 186 offline tests pass (128 before), including replay of every recorded defense row
   and a summary-matches-script check. ruff and gitleaks clean.
+
+## Milestone 5: write-up, README, CI checks (Nov 5, 2026)
+
+- `docs/findings.md`: question, setup, baseline and defense numbers, takeaways and limits.
+- README rewritten: status, results at a glance, updated roadmap, design notes and limits.
+- `tests/test_docs_numbers.py`: the attack-success tables in `results/defenses/RESULTS.md` and
+  `docs/findings.md` must match `results/defenses/summary.csv`.
+- CI: new step fails on any tracked file over 1 MB (largest tracked file is about 120 KB).
+- Self-review: every attack-success, control and gateway number in the docs re-checked
+  against the summary files.
