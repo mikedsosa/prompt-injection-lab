@@ -1,11 +1,29 @@
 .venv/
 __pycache__/
 *.pyc
+*.pyo
 .pytest_cache/
 .ruff_cache/
 *.egg-info/
 build/
 dist/
-# local run outputs; real results get committed deliberately, not by accident
+# local run outputs; committed result JSONL/CSV under results/{baseline,full-baseline,defenses,smoke}/ stay tracked
 results/runs/
 .env
+.env.*
+!.env.example
+# secrets / credentials
+secrets/
+*.pem
+*.p12
+*.key
+credentials.json
+**/secrets.*
+# local model weights and Ollama data (not the Python package src/fabrikam_lab/models/)
+/models/
+*.gguf
+*.ggml
+*.bin
+!**/src/**/*.py
+.ollama/
+ollama/
