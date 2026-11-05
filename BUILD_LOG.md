@@ -48,3 +48,53 @@ Ollama 0.40.11, `OLLAMA_CONTEXT_LENGTH=8192` (confirmed 8192 in `/api/ps` for bo
 model loaded at a time, temperature 0, seed 1, max 6 turns. Attack success: qwen2.5:7b-instruct
 8/20, llama3.1:8b 7/20. Wall time 429.3 s (Qwen) and 406.0 s (Llama). Full table and caveats in
 `results/baseline/RESULTS.md`. Small baseline: one run per case.
+
+## Milestone 3: 60 cases, email and multi-turn vectors, full baseline
+
+- Cases: 50 attacks and 10 benign controls.
+  - New vectors: indirect email (a `read_email` tool over `data/mailbox.json`) and multi-turn
+    (a scripted conversation history).
+  - Each case is tagged with a `technique_family`.
+  - Each case cites taxonomy entries (OWASP Top 10 for Agentic Applications ASI01; MITRE ATLAS
+    AML.T0051, T0054, T0057) plus papers. The links were rechecked with curl on Nov 4;
+    `SOURCES.md` has 19 keys.
+- Controls carry `task_checks` and are scored for harm (canary leak, outside email, unexpected
+  MFA reset) and for whether the benign task was done.
+- Scoring also catches the canary reversed, or encoded as base64 or hex.
+- `scripts/run_cases.py`:
+  - New options: `--seeds`, `--out-dir` and `--resume`.
+  - `--resume` keeps the finished rows after checking that model, digest, temperature, seed
+    and max turns match.
+- New scripts:
+  - `scripts/summarize_full.py`: rates by vector, goal and family, the spread across seeds,
+    and controls.
+  - `scripts/rescore_full.py`: offline re-scoring from the recorded responses, with an audit
+    trail in the meta line.
+- Make targets:
+  - New: `full-qwen`, `full-llama` and `full-summary`.
+  - `cases-qwen` and `cases-llama` are now pinned to PI-001..PI-020, so they cannot overwrite
+    `results/baseline/`.
+- Tests: loader and schema, scoring (encoded leaks, controls), replay of every recorded
+  full-baseline row, and a check that the committed summary matches the script output.
+
+### Full baseline (Nov 4, 2026)
+
+- Setup: Ollama 0.40.11, `OLLAMA_CONTEXT_LENGTH=8192`, one model at a time, temperature 0,
+  seeds 1 and 2, max 6 turns.
+- Attack success (n = 50 per seed):
+  - Qwen: 19/50 and 20/50.
+  - Llama: 16/50 and 15/50.
+- Controls:
+  - No harm on any run.
+  - Task done: Qwen 9/10 and 8/10; Llama 7/10 and 7/10.
+- Full results: `results/full-baseline/RESULTS.md`.
+- Seeds: 2 instead of 3, for runtime.
+  - The estimate for 3 seeds was about 132 minutes.
+  - Llama's first turn on CTL-008 then ran to the 900 s timeout on both seeds.
+- Llama seed 2 was stopped on CTL-008 and restarted with `--resume`.
+- Two Llama runner crashes (PI-033 seed 1, PI-012 seed 2) were kernel OOM kills of
+  `llama-server` on the shared 15 GB machine. Both are recorded as `model_error`.
+- Disclosure: the CTL-006 task check missed a correct answer ("is not currently compliant").
+  - The check was widened and all files were re-scored offline.
+  - One row changed: Qwen seed 1 CTL-006, from task not done to done.
+- No defenses yet (milestone 4).

@@ -17,7 +17,7 @@ def test_bundled_data_loaded():
 
 def test_tool_specs_are_well_formed():
     tools = openai_tools()
-    assert len(tools) == len(TOOL_SPECS) == 6
+    assert len(tools) == len(TOOL_SPECS) == 7
     for t in tools:
         assert t["type"] == "function"
         params = t["function"]["parameters"]
@@ -86,3 +86,24 @@ def test_overrides_add_documents():
     )
     assert env.call("read_kb_article", {"article_id": "KB-7777"}).ok
     assert env.call("fetch_ticket", {"ticket_id": "HD-9"}).ok
+
+
+def test_read_email_and_unknown_message():
+    env = ToolEnv()
+    rec = env.call("read_email", {"message_id": "EM-6001"})
+    assert rec.ok and rec.result["from"].endswith("@fabrikam.example")
+    rec = env.call("read_email", {"message_id": "EM-9999"})
+    assert not rec.ok and "not found" in rec.error
+
+
+def test_bundled_mailbox_uses_reserved_domain():
+    data = default_data()
+    assert {"EM-6001", "EM-6002"} <= set(data["emails"])
+    for m in data["emails"].values():
+        assert m["from"].endswith("@fabrikam.example") and m["to"].endswith("@fabrikam.example")
+
+
+def test_email_override_adds_message():
+    env = ToolEnv.with_overrides(extra_emails={"EM-9001": {"message_id": "EM-9001", "body": "x"}})
+    assert env.read_email("EM-9001")["body"] == "x"
+    assert "EM-6001" in env.data["emails"]

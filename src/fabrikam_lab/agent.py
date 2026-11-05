@@ -60,11 +60,15 @@ def run_agent(
     max_turns: int = DEFAULT_MAX_TURNS,
     temperature: float = 0.0,
     seed: int | None = None,
+    history: list[dict[str, str]] | None = None,
 ) -> AgentResult:
+    """Run the loop. ``history`` is an optional scripted earlier conversation (user and
+    assistant turns) placed between the system prompt and ``user_message``."""
     env = env if env is not None else ToolEnv()
     tools = openai_tools()
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": system_prompt},
+        *({"role": h["role"], "content": h["content"]} for h in history or []),
         {"role": "user", "content": user_message},
     ]
     malformed = 0

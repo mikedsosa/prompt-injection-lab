@@ -42,7 +42,7 @@ def test_request_shape(captured):
     assert captured["url"] == "http://127.0.0.1:11434/v1/chat/completions"
     body = captured["body"]
     assert body["model"] == "qwen2.5:7b-instruct" and body["seed"] == 3 and body["temperature"] == 0.0
-    assert body["stream"] is False and len(body["tools"]) == 6
+    assert body["stream"] is False and len(body["tools"]) == 7
     assert "Authorization" not in captured["headers"]
     assert resp.content == "hi" and resp.latency_s is not None
 

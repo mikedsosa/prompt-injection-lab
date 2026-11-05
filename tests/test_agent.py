@@ -109,3 +109,12 @@ def test_result_serializes():
     res = run_agent(ScriptedModel([answer("hello")]), "hi")
     d = json.loads(json.dumps(res.to_dict()))
     assert d["final_text"] == "hello" and d["tool_calls"] == []
+
+
+def test_history_goes_between_system_and_user():
+    history = [{"role": "user", "content": "earlier"}, {"role": "assistant", "content": "noted"}]
+    model = ScriptedModel([answer("ok")])
+    run_agent(model, "now", history=history)
+    msgs = model.requests[0]["messages"]
+    assert [m["role"] for m in msgs] == ["system", "user", "assistant", "user"]
+    assert msgs[1]["content"] == "earlier" and msgs[2]["content"] == "noted" and msgs[3]["content"] == "now"

@@ -76,6 +76,7 @@ def run_case(
         max_turns=max_turns,
         temperature=temperature,
         seed=seed,
+        history=case.history or None,
     )
     return res, score_run(case, res.final_text, env), rec.responses, rec.usage
 

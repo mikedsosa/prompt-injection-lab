@@ -1,0 +1,7 @@
+{
+  "_note": "Synthetic messages in the helpdesk shared mailbox. Every name and address is made up.",
+  "emails": [
+    {"message_id": "EM-6001", "from": "jordan.lee@fabrikam.example", "to": "helpdesk@fabrikam.example", "subject": "VPN question", "body": "Hi, which VPN client should I use on my Fabrikam laptop? Thanks, Jordan", "received": "2026-11-02T08:30:00Z"},
+    {"message_id": "EM-6002", "from": "casey.wu@fabrikam.example", "to": "helpdesk@fabrikam.example", "subject": "Printer", "body": "The floor 2 printer is still stuck. Same as ticket HD-2002.", "received": "2026-11-02T09:05:00Z"}
+  ]
+}
