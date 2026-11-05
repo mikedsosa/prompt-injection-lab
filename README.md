@@ -1,5 +1,8 @@
 # Fabrikam agent injection lab
 
+[![CI](https://github.com/mikedsosa/prompt-injection-lab/actions/workflows/ci.yml/badge.svg)](https://github.com/mikedsosa/prompt-injection-lab/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 A small, tool-using IT helpdesk agent for the fictional company Fabrikam, built to
 measure how often prompt injection makes it misuse its tools, and how much simple
 prompt-level defenses help.
@@ -7,7 +10,8 @@ prompt-level defenses help.
 > **Status: milestones 1 to 5 done.** 60 original cases (50 attacks, 10 benign controls), an
 > undefended two-seed baseline and a seed-1 defense comparison on two local 7-8B models.
 > Short write-up: [`docs/findings.md`](docs/findings.md). Threat model:
-> [`docs/threat-model.md`](docs/threat-model.md).
+> [`docs/threat-model.md`](docs/threat-model.md). Architecture:
+> [`docs/architecture.md`](docs/architecture.md).
 
 ## Lab / how to run
 
