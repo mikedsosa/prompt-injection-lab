@@ -3,9 +3,12 @@
     python scripts/run_cases.py --model qwen            # all cases
     python scripts/run_cases.py --model llama --cases PI-001 PI-007
     python scripts/run_cases.py --model qwen --seeds 1 2 3 --out-dir results/full-baseline
+    python scripts/run_cases.py --model qwen --seeds 1 --defense gateway --max-tokens 1024 \
+        --out-dir results/defenses --resume
 
 Without --seeds, writes results/baseline/<model>.jsonl with the config seed (milestone 2
-layout). With --seeds, writes <out-dir>/<model>-seed<N>.jsonl, one file per seed.
+layout). With --seeds, writes <out-dir>/<model>-seed<N>.jsonl, one file per seed, or
+<out-dir>/<model>-<defense>-seed<N>.jsonl when --defense is not "none" (milestone 4).
 Each file has a meta line (model tag and digest, Ollama
 version, server context length, temperature, seed), then one line per case with the
 score and the recorded model responses, so CI can replay and re-score the run offline.
@@ -28,7 +31,11 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from fabrikam_lab.cases import load_cases  # noqa: E402
 from fabrikam_lab.config import load_config, make_client  # noqa: E402
+from fabrikam_lab.defenses import CONFIGS, system_prompt  # noqa: E402
 from fabrikam_lab.harness import DEFAULT_CASE_MAX_TURNS, run_case  # noqa: E402
+from fabrikam_lab.prompts import BASELINE_SYSTEM_PROMPT  # noqa: E402
+
+RESUME_KEYS = ("model", "model_digest", "temperature", "seed", "max_turns", "defense", "max_tokens")
 
 
 def ollama_ps(base_url: str) -> list[dict]:
@@ -42,6 +49,8 @@ def ollama_ps(base_url: str) -> list[dict]:
 
 def run_one(args, client, cases, seed, temperature, out_path: Path) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    defense = CONFIGS[args.defense]
+    prompt = system_prompt(BASELINE_SYSTEM_PROMPT, defense)
     meta = {
         "model_key": args.model,
         **client.info(),
@@ -49,11 +58,21 @@ def run_one(args, client, cases, seed, temperature, out_path: Path) -> None:
         "temperature": temperature,
         "seed": seed,
         "max_turns": args.max_turns,
-        "system_prompt": "baseline (undefended) + per-case canary line",
+        "system_prompt": (
+            "baseline (undefended) + per-case canary line"
+            if args.defense == "none"
+            else f"defense config {args.defense!r} + per-case canary line"
+        ),
         "n_cases": len(cases),
         "python": platform.python_version(),
         "started_utc": dt.datetime.now(dt.UTC).isoformat(timespec="seconds"),
     }
+    if args.defense != "none" or args.max_tokens:
+        # Only milestone 4 runs carry these keys, so milestone 3 files resume as before.
+        meta["defense"] = args.defense
+        meta["defense_flags"] = defense.to_dict()
+        meta["system_prompt_text"] = prompt
+        meta["max_tokens"] = args.max_tokens
     t0 = time.monotonic()
     rows = []
     prefix: list[dict] = []
@@ -61,7 +80,7 @@ def run_one(args, client, cases, seed, temperature, out_path: Path) -> None:
         old = [json.loads(line) for line in out_path.read_text(encoding="utf-8").splitlines() if line.strip()]
         done = [r for r in old if "case" in r]
         old_meta = old[0]["meta"]
-        for k in ("model", "model_digest", "temperature", "seed", "max_turns"):
+        for k in RESUME_KEYS:
             if old_meta.get(k) != meta.get(k):
                 raise SystemExit(f"cannot resume {out_path.name}: {k} differs ({old_meta.get(k)!r} vs {meta.get(k)!r})")
         old_meta.setdefault("resumed", []).append(
@@ -79,7 +98,7 @@ def run_one(args, client, cases, seed, temperature, out_path: Path) -> None:
             if case.id in done_ids:
                 continue
             res, score, responses, usage = run_case(
-                client, case, max_turns=args.max_turns, temperature=temperature, seed=seed
+                client, case, max_turns=args.max_turns, temperature=temperature, seed=seed, defense=defense
             )
             if not wrote_server:
                 fh.write(json.dumps({"server": {"ollama_ps": ollama_ps(client.base_url)}}) + "\n")
@@ -94,7 +113,10 @@ def run_one(args, client, cases, seed, temperature, out_path: Path) -> None:
                 "stop_reason": res.stop_reason,
                 "turns": res.turns,
                 "malformed_tool_calls": res.malformed_tool_calls,
-                "calls": [{"name": c.name, "arguments": c.arguments, "ok": c.ok} for c in res.tool_calls],
+                "calls": [
+                    {"name": c.name, "arguments": c.arguments, "ok": c.ok, **({"blocked": True} if c.blocked else {})}
+                    for c in res.tool_calls
+                ],
                 "final_text": res.final_text,
                 "error": res.error,
                 "wall_s": res.wall_s,
@@ -125,6 +147,7 @@ def run_one(args, client, cases, seed, temperature, out_path: Path) -> None:
         json.dumps(
             {
                 "model": args.model,
+                "defense": args.defense,
                 "seed": seed,
                 "attack_success": f"{sum(r['attack_success'] for r in attacks)}/{len(attacks)}",
                 "total_wall_s": round(time.monotonic() - t0, 1),
@@ -148,15 +171,23 @@ def main() -> int:
         help="keep finished case rows already in the output file and run only the rest",
     )
     ap.add_argument("--out-dir", default=str(ROOT / "results" / "full-baseline"), help="directory for --seeds runs")
+    ap.add_argument("--defense", default="none", choices=sorted(CONFIGS), help="milestone 4 mitigation config")
+    ap.add_argument(
+        "--max-tokens",
+        type=int,
+        default=None,
+        help="cap on tokens per model response (sent as max_tokens); default: no cap, as in the baseline",
+    )
     args = ap.parse_args()
 
     cfg = load_config()
-    client = make_client(args.model, cfg)
+    client = make_client(args.model, cfg, extra_body={"max_tokens": args.max_tokens} if args.max_tokens else None)
     temperature = cfg["defaults"].get("temperature", 0.0)
     cases = load_cases(ids=args.cases)
     if args.seeds:
         out_dir = Path(args.out_dir)
-        jobs = [(seed, out_dir / f"{args.model}-seed{seed}.jsonl") for seed in args.seeds]
+        tag = args.model if args.defense == "none" else f"{args.model}-{args.defense}"
+        jobs = [(seed, out_dir / f"{tag}-seed{seed}.jsonl") for seed in args.seeds]
     else:
         out_path = Path(args.out) if args.out else ROOT / "results" / "baseline" / f"{args.model}.jsonl"
         jobs = [(cfg["defaults"].get("seed"), out_path)]

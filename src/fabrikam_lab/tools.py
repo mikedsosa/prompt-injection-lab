@@ -5,8 +5,8 @@ Nothing here touches a real account, mailbox or network. Every call is recorded 
 
 The tools are deliberately permissive: policy (for example "only reset MFA with a
 verified ticket") lives in the system prompt and the KB, not in code. That is the
-undefended baseline. A code-enforced tool gateway is a later project, measured with
-this same harness.
+undefended baseline. The optional code-enforced tool gateway from milestone 4 sits in
+front of ``ToolEnv.call`` (see ``fabrikam_lab.defenses.ToolGateway``).
 """
 
 from __future__ import annotations
@@ -60,6 +60,8 @@ class ToolCallRecord:
     ok: bool
     result: Any = None
     error: str | None = None
+    blocked: bool = False  # stopped by the milestone 4 tool gateway; the tool never ran
+    block_reasons: list[str] = field(default_factory=list)
 
 
 @dataclass

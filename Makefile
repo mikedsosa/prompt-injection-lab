@@ -1,4 +1,4 @@
-.PHONY: setup lint test secrets check smoke-qwen smoke-llama cases-qwen cases-llama summary full-qwen full-llama full-summary
+.PHONY: setup lint test secrets check smoke-qwen smoke-llama cases-qwen cases-llama summary full-qwen full-llama full-summary defenses defense-summary
 
 setup:
 	python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
@@ -43,3 +43,13 @@ full-llama:
 
 full-summary:
 	.venv/bin/python scripts/summarize_full.py
+
+# Defenses (milestone 4): spotlight, hardened, gateway and all, seed 1, both models one after the
+# other, detached-safe and resumable. The output-filter-only runs are derived offline from the
+# baseline (no model calls). Then the comparison summary.
+defenses:
+	scripts/run_defenses.sh qwen llama
+
+defense-summary:
+	.venv/bin/python scripts/derive_output_filter.py
+	.venv/bin/python scripts/summarize_defenses.py

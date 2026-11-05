@@ -19,7 +19,7 @@ def load_config(path: Path | str = DEFAULT_CONFIG) -> dict[str, Any]:
     return cfg
 
 
-def make_client(key: str, cfg: dict[str, Any]) -> OpenAICompatClient:
+def make_client(key: str, cfg: dict[str, Any], extra_body: dict[str, Any] | None = None) -> OpenAICompatClient:
     try:
         m = cfg["models"][key]
     except KeyError as exc:
@@ -29,4 +29,5 @@ def make_client(key: str, cfg: dict[str, Any]) -> OpenAICompatClient:
         model=m["model"],
         api_key_env=m.get("api_key_env"),
         timeout_s=m.get("timeout_s", cfg["defaults"].get("timeout_s", 900)),
+        extra_body=extra_body,
     )

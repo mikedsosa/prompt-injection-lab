@@ -4,7 +4,8 @@ The 60 cases in `cases/` (50 attacks, 10 benign controls) are written from scrat
 fictional Fabrikam helpdesk.
 No case text is copied from a dataset. Each case lists the source keys below for the
 technique it is based on. All links were checked on Nov 4, 2026 (the
-milestone 3 additions were checked again with curl the same day).
+milestone 3 additions were checked again with curl the same day). The three milestone 4 keys
+(`OWASP-ASI02`, `OWASP-ASI03`, `HINES-2024`) support the defenses, not the cases.
 
 | Key | Source | Used for |
 |-----|--------|----------|
@@ -24,6 +25,9 @@ milestone 3 additions were checked again with curl the same day).
 | `RUSSINOVICH-2024` | Russinovich, Salem and Eldan, "Great, Now Write an Article About That: The Crescendo Multi-Turn LLM Jailbreak Attack" (2024). https://arxiv.org/abs/2404.01833 | Multi-turn setups, where earlier turns prepare the request that comes later |
 | `LI-2023` | Li et al., "Multi-step Jailbreaking Privacy Attacks on ChatGPT" (2023). https://arxiv.org/abs/2304.05197 | A fabricated assistant turn in the history that "agrees" to the attacker's framing |
 | `OWASP-ASI01` | OWASP Top 10 for Agentic Applications for 2026, ASI01: Agent Goal Hijack. https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/ | Agent goal hijack (tagged on every attack case); especially inbound email and instructions split across sources |
+| `OWASP-ASI02` | OWASP Top 10 for Agentic Applications for 2026, ASI02: Tool Misuse and Exploitation. https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/ | Milestone 4 tool gateway: limits on what the agent's tools will do, whatever the model asks |
+| `OWASP-ASI03` | OWASP Top 10 for Agentic Applications for 2026, ASI03: Identity and Privilege Abuse. https://genai.owasp.org/resource/owasp-top-10-for-agentic-applications-for-2026/ | Milestone 4 tool gateway: an MFA reset only for the verified ticket requester |
+| `HINES-2024` | Hines et al., "Defending Against Indirect Prompt Injection Attacks With Spotlighting" (2024). https://arxiv.org/abs/2403.14720 | Milestone 4 spotlighting defense (datamarking with `^` and delimiters around tool output) |
 | `ATLAS-T0051` | MITRE ATLAS AML.T0051 LLM Prompt Injection (direct .000 and indirect .001), from the ATLAS data release. https://github.com/mitre-atlas/atlas-data/blob/main/dist/ATLAS.yaml | Direct and indirect injection (tagged on every attack case), as a second taxonomy next to OWASP |
 | `ATLAS-T0054` | MITRE ATLAS AML.T0054 LLM Jailbreak, same data release. https://github.com/mitre-atlas/atlas-data/blob/main/dist/ATLAS.yaml | Role-play personas used to set aside the assistant's rules (tagged on every role-play case) |
 | `ATLAS-T0057` | MITRE ATLAS AML.T0057 LLM Data Leakage, same data release. https://github.com/mitre-atlas/atlas-data/blob/main/dist/ATLAS.yaml | Prompts that try to make the model leak a secret (tagged on every leak case) |

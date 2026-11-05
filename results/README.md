@@ -1,5 +1,9 @@
 # Results
 
+- `defenses/` holds the milestone 4 defense runs: seed 1, all 60 cases, both models,
+  configs spotlight, hardened, gateway, all (live) and output_filter (derived offline from
+  the baseline). See `defenses/RESULTS.md`; tables from `scripts/summarize_defenses.py`.
+  `run.log` is the driver log, including the two resumes.
 - `full-baseline/` holds the milestone 3 full baseline: 60 cases (50 attacks, 10 benign
   controls), run against `qwen2.5:7b-instruct` and `llama3.1:8b` with seeds 1 and 2 at
   temperature 0, with no defenses. See `full-baseline/RESULTS.md` for the numbers and limits.

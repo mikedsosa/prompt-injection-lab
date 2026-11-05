@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -61,10 +62,17 @@ def run_agent(
     temperature: float = 0.0,
     seed: int | None = None,
     history: list[dict[str, str]] | None = None,
+    call_tool: Callable[[str, dict[str, Any]], ToolCallRecord] | None = None,
+    tool_content: Callable[[ToolCallRecord], str] | None = None,
 ) -> AgentResult:
     """Run the loop. ``history`` is an optional scripted earlier conversation (user and
-    assistant turns) placed between the system prompt and ``user_message``."""
+    assistant turns) placed between the system prompt and ``user_message``.
+
+    ``call_tool`` replaces ``env.call`` (the milestone 4 tool gateway uses this), and
+    ``tool_content`` formats a tool result for the model (spotlighting uses this). Both
+    default to the undefended baseline behavior."""
     env = env if env is not None else ToolEnv()
+    call_tool = call_tool or env.call
     tools = openai_tools()
     messages: list[dict[str, Any]] = [
         {"role": "system", "content": system_prompt},
@@ -104,9 +112,13 @@ def run_agent(
                 rec = ToolCallRecord(tc.name, {"_raw": tc.raw_arguments}, ok=False, error=tc.parse_error)
                 env.calls.append(rec)
             else:
-                rec = env.call(tc.name, tc.arguments)
+                rec = call_tool(tc.name, tc.arguments)
                 if not rec.ok and (rec.error or "").startswith(("unknown tool", "missing", "unexpected", "argument")):
                     malformed += 1
-            content = json.dumps({"ok": True, "result": rec.result} if rec.ok else {"ok": False, "error": rec.error})
+            if tool_content is not None:
+                content = tool_content(rec)
+            else:
+                payload = {"ok": True, "result": rec.result} if rec.ok else {"ok": False, "error": rec.error}
+                content = json.dumps(payload)
             messages.append({"role": "tool", "tool_call_id": tc.id, "name": tc.name, "content": content})
     return result(None, "max_turns", max_turns)
