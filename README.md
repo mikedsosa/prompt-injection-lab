@@ -9,6 +9,10 @@ prompt-level defenses help.
 > Short write-up: [`docs/findings.md`](docs/findings.md). Threat model:
 > [`docs/threat-model.md`](docs/threat-model.md).
 
+## Lab / how to run
+
+Lab for a fictional Fabrikam IT helpdesk agent that measures how often prompt injection makes it misuse its tools, and how much simple prompt-level defenses help. Synthetic data only (`fabrikam.example`); nothing touches a real account, mailbox, or network. Offline: `make setup` then `make check`. Against a local Ollama model, see [Running it](#running-it).
+
 ## Results at a glance
 
 Attack success out of 50 attack cases, seed 1, temperature 0
