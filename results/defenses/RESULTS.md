@@ -60,11 +60,11 @@ every one of them.
 ## Disclosures
 
 1. **Mid-run prompt-cache fix (Qwen spotlighting).** The model server's prompt cache was
-   growing about 55 MB per case, the likely cause of earlier Llama OOM kills. At 6:53 PM MT
+   growing with each case, the likely cause of earlier Llama OOM kills. At 6:53 PM MT
    Nov 4 the driver was stopped, Ollama restarted with `LLAMA_ARG_CACHE_RAM=0`, and the run
    resumed; cases PI-025 onward ran with the cache off. Prompts, temperature, seed and model
    were unchanged. Every later run used the cache off.
-2. **Box restart during Llama spotlighting.** The machine restarted around 8 PM MT Nov 4
+2. **Box restart during Llama spotlighting.** The machine restarted between 7:43 PM and 9:54 PM MT Nov 4
    after PI-009. Ollama 0.40.11 was reinstalled, the venv recreated, and the run resumed at
    9:54 PM MT from PI-010 with `--resume` (same model digest, settings and cache off).
    Both events are in `run.log`.

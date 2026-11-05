@@ -58,7 +58,7 @@ the limits in the results file before drawing conclusions.
 
 ## Design choices
 
-- **Local, open-weight models only.** Planned pair: `qwen2.5:7b-instruct` and
+- **Local, open-weight models only.** Models: `qwen2.5:7b-instruct` and
   `llama3.1:8b`, served by Ollama on a CPU-only machine. No paid APIs, no API keys.
   Only one model is loaded at a time.
 - **Undefended baseline first.** The tools themselves do not enforce policy (for example,
@@ -86,7 +86,7 @@ the limits in the results file before drawing conclusions.
 - Small (7-8B), quantized local models. Findings won't automatically carry over to larger
   hosted models, which often have extra provider-side safety layers.
 - Temperature 0 with two seeds per model for the baseline and one seed for defenses. On this CPU setup, temperature 0 is
-  not fully deterministic across seeds (see the seed-agreement numbers in the results).
+  not fully deterministic across seeds (see the seed-agreement numbers in [`results/full-baseline/summary-table.md`](results/full-baseline/summary-table.md)).
 - Small per-category samples (2 to 13 cases per vector, goal or technique family).
 
 ## Running it
