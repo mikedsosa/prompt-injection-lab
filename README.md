@@ -13,6 +13,16 @@ prompt-level defenses help.
 > [`docs/threat-model.md`](docs/threat-model.md). Architecture:
 > [`docs/architecture.md`](docs/architecture.md).
 
+## Problem
+
+A tool-using helpdesk agent can be talked into misusing its tools: resetting MFA, sending mail, or leaking data that was planted in a ticket, a knowledge-base article, or an inbound email. Vendor write-ups are hard to replay, and paid APIs are out of scope here. This lab measures, on a laptop, how often prompt injection makes a small open-weight agent misuse its tools, and how much simple prompt-level defenses change that.
+
+## Approach
+
+The agent is a plain Python loop with mock Fabrikam tools over synthetic `fabrikam.example` data. Side effects stay in in-memory logs. Cases are one JSON file each: 50 attacks and 10 benign controls, covering direct injection, indirect injection through a KB article, a ticket, a tool result or inbound email, and a scripted multi-turn history. Every attack is tagged to OWASP LLM Top 10, OWASP Agentic Top 10 (ASI01) and MITRE ATLAS. Scoring is deterministic from the final answer, the mock outbox and the tool log, using per-case canaries (including reversed, base64 and hex forms), not another model.
+
+Defenses are separate flags, measured alone and together: spotlighting, a hardened system prompt, a code-enforced tool gateway and an output filter. The tools themselves do not enforce policy, so the undefended baseline is honest. Models are local `qwen2.5:7b-instruct` and `llama3.1:8b` on Ollama. There are no paid APIs and no API keys. Offline tests block every network connection.
+
 ## Lab / how to run
 
 Lab for a fictional Fabrikam IT helpdesk agent that measures how often prompt injection makes it misuse its tools, and how much simple prompt-level defenses help. Synthetic data only (`fabrikam.example`); nothing touches a real account, mailbox, or network. Offline: `make setup` then `make check`. Against a local Ollama model, see [Running it](#running-it).
